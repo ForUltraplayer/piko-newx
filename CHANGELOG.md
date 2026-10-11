@@ -1,3 +1,8 @@
+## [3.56.0](https://github.com/crimera/piko-newx/compare/v3.55.0...v3.56.0) (2026-10-11)
+
+### ✨ New Features
+* **Twitter:** add thumbnail on download notification ([3bb54b6](https://github.com/crimera/piko/commit/3bb54b6501fe496f9d92e4b04ded0f75c923c57c))
+
 ## [3.55.0](https://github.com/crimera/piko-newx/compare/v3.54.2...v3.55.0) (2026-10-11)
 
 ### 🐛 Bug Fixes
