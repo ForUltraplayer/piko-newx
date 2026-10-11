@@ -1,3 +1,11 @@
+## [3.55.0](https://github.com/crimera/piko-newx/compare/v3.54.2...v3.55.0) (2026-10-11)
+
+### 🐛 Bug Fixes
+* **Twitter - newx:** retry and fall back for blank profile Photos thumbnails ([8a6fa06](https://github.com/crimera/piko/commit/8a6fa0679b0bc637139b43480fafe57ea69e5cb9))
+
+### ✨ New Features
+* **Twitter:** support 12.33.1-prod.01 ([6f55fc0](https://github.com/crimera/piko/commit/6f55fc09d02817c69415111593824f2f5da26cf8))
+
 ## [3.54.2](https://github.com/crimera/piko-newx/compare/v3.54.1...v3.54.2) (2026-10-10)
 
 ### 🐛 Bug Fixes
