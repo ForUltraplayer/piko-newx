@@ -1,3 +1,21 @@
+## [3.57.0](https://github.com/crimera/piko-newx/compare/v3.56.1...v3.57.0) (2026-10-15)
+
+### 🐛 Bug Fixes
+* **Twitter - newx:** keep the static bird when the top-bar xlogo is gone ([bba8888](https://github.com/crimera/piko/commit/bba88886a7a3b1c07520e1a93f97379b1558708e))
+* **Twitter - newx:** skip only the timeline map write when not loaded ([41cb969](https://github.com/crimera/piko/commit/41cb96908aaa7e74df27b690e3aac3aed7513a57))
+* **Twitter - newx:** find the XDS dark scheme through forwarding constructors ([a40bf67](https://github.com/crimera/piko/commit/a40bf67392abea0b3e713856d7159e3172339d59))
+* **Twitter - newx:** place the reply-bar setting read where a four-bit register is free ([1027512](https://github.com/crimera/piko/commit/1027512dc67923f5ddd11f1913390ed0742a5f7d))
+* **Twitter - newx:** match the card navigation helper regardless of arity ([06f6a17](https://github.com/crimera/piko/commit/06f6a17856dbf6a9ff8f5ac5ceba235d27367002))
+* **Twitter - newx:** use dark theme action tints in the light media viewer ([df8a1ec](https://github.com/crimera/piko/commit/df8a1ec73a39f2b316417135694f357cd7155340))
+
+### ✨ New Features
+* **Twitter - newx:** retire force-quality patch and log media stream requests ([1436559](https://github.com/crimera/piko/commit/14365593bf5f7f1b68b0588ba09dc36485e3658f))
+* **Twitter - newx:** add opt-in logging of HLS audio renditions ([20176ed](https://github.com/crimera/piko/commit/20176ede8745f31890ce99ec3baca1c015c344e3))
+* **Twitter:** support 12.34.0-prod.01 ([cb884cf](https://github.com/crimera/piko/commit/cb884cf785fe554eed0b5815bb54bc2a30f9cad1))
+
+### New Patches
+* **Twitter:** NewX: Log HLS audio renditions
+
 ## [3.56.1](https://github.com/crimera/piko-newx/compare/v3.56.0...v3.56.1) (2026-10-12)
 
 ### 🐛 Bug Fixes
