@@ -1,3 +1,10 @@
+## [3.57.1](https://github.com/crimera/piko-newx/compare/v3.57.0...v3.57.1) (2026-10-17)
+
+### 🐛 Bug Fixes
+* **Twitter:** settings re-design ([8814a72](https://github.com/crimera/piko/commit/8814a7225ce188d92088e3b87aa4a0e24e312510))
+* **Twitter - newx:** support 12.35.0 production resolver drift ([35cf5f7](https://github.com/crimera/piko/commit/35cf5f7df252de3ac691c1db54ffbe7746d7c92e))
+* **Twitter - newx:** restore bird in pull-to-refresh logo ([6fc0967](https://github.com/crimera/piko/commit/6fc09670fd9f0f1cdf5a7d0dc8e83402394862c1))
+
 ## [3.57.0](https://github.com/crimera/piko-newx/compare/v3.56.1...v3.57.0) (2026-10-15)
 
 ### 🐛 Bug Fixes
