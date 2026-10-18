@@ -1,3 +1,13 @@
+## [3.58.0](https://github.com/crimera/piko-newx/compare/v3.57.1...v3.58.0) (2026-10-18)
+
+### 🐛 Bug Fixes
+* **Twitter - newx:** normalize GIF download containers ([f8c68db](https://github.com/crimera/piko/commit/f8c68dbc5f4cbf11777a5a329cfdcc99e120c9a5))
+* **Twitter - newx:** anchor only posts and force the key relocation measure ([ea2ea92](https://github.com/crimera/piko/commit/ea2ea92086c7a66f5d54df29bbcb2dc558f49827))
+* **Twitter - newx:** scope saved timeline positions to the account ([7dbe192](https://github.com/crimera/piko/commit/7dbe1928e6e71bac6a507ea30ec00b1af6bbdb8a))
+
+### ✨ New Features
+* **Twitter - newx:** restore timeline position by post anchor ([90b96cf](https://github.com/crimera/piko/commit/90b96cf93c9250d08f2c88805e32ce9606d345fe))
+
 ## [3.57.1](https://github.com/crimera/piko-newx/compare/v3.57.0...v3.57.1) (2026-10-17)
 
 ### 🐛 Bug Fixes
