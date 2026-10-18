@@ -1,3 +1,14 @@
+## [3.59.0](https://github.com/crimera/piko-newx/compare/v3.58.0...v3.59.0) (2026-10-18)
+
+### 🐛 Bug Fixes
+* **Twitter:** Remove support for older versions ([8f07e33](https://github.com/crimera/piko/commit/8f07e335113695cc8962825a333e095a54d3285c))
+
+### ✨ New Features
+* **Twitter - newx:** hide post author actions ([11ea728](https://github.com/crimera/piko/commit/11ea728b9e0a907b2162b79445368cbcef21e783))
+
+### New Patches
+* **Twitter:** NewX: Hide post author actions
+
 ## [3.58.0](https://github.com/crimera/piko-newx/compare/v3.57.1...v3.58.0) (2026-10-18)
 
 ### 🐛 Bug Fixes
