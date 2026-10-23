@@ -1,3 +1,11 @@
+## [3.61.0](https://github.com/crimera/piko-newx/compare/v3.60.0...v3.61.0) (2026-10-23)
+
+### ✨ New Features
+* **Twitter - newx:** support 12.36.1-prod.01 ([370eac8](https://github.com/crimera/piko/commit/370eac89f810e6f0293c08af512591fe08431980))
+
+### 🔧 Improvements
+* **Twitter:** clean up Kotlin warnings and deprecated resource helpers ([c7256d5](https://github.com/crimera/piko/commit/c7256d5d3a34abf3cbd3e4965c9da7e257dfafec))
+
 ## [3.60.0](https://github.com/crimera/piko-newx/compare/v3.59.0...v3.60.0) (2026-10-23)
 
 ### 🐛 Bug Fixes
