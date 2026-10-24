@@ -1,3 +1,9 @@
+## [3.63.0](https://github.com/crimera/piko-newx/compare/v3.62.0...v3.63.0) (2026-10-24)
+
+### ✨ New Features
+* **Twitter - newx:** support 12.37.1-prod.01 ([a11b151](https://github.com/crimera/piko/commit/a11b151bd4e5b91a6cd65aa733185dbd66231dac))
+* **Twitter - newx:** support 12.37.0-prod.01 ([ec30b96](https://github.com/crimera/piko/commit/ec30b9639dd3c95e1e38bb0e81afc49c2a40356b))
+
 ## [3.62.0](https://github.com/crimera/piko-newx/compare/v3.61.0...v3.62.0) (2026-10-24)
 
 ### 🐛 Bug Fixes
