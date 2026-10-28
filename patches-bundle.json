@@ -1,9 +1,9 @@
 {
-  "version": "v3.66.0",
-  "download_url": "https://github.com/crimera/piko-newx/releases/download/v3.66.0/patches-3.66.0.mpp",
-  "created_at": "2026-10-28T08:43:15",
-  "description": "Piko x-lite patch bundle for Morphe (v3.66.0).",
-  "signature_download_url": "https://github.com/crimera/piko-newx/releases/download/v3.66.0/patches-3.66.0.mpp.asc",
+  "version": "v0.1.0",
+  "download_url": "https://github.com/ForUltraplayer/piko-newx/releases/download/v0.1.0/piko-newx-korean-0.1.0.mpp",
+  "created_at": "2026-10-28T12:44:34",
+  "description": "Piko NewX Korean: 469 translated settings strings, based on Piko 3.66.0.",
+  "public_key": "6iQ6hqJxBqgzFgkV7q5/EgHshebpvZLHczn9gKriq70=",
   "app_version": "12.37.2-prod.01",
   "piko_commit": "48af8e1a7438e6d4d2f18ebe894acdcc0eeb7272"
 }

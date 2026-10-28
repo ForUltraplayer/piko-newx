@@ -1,0 +1,1284 @@
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/filteredreplies/FilteredRepliesDialog.java b/extensions/newx/src/main/java/app/morphe/extension/newx/filteredreplies/FilteredRepliesDialog.java
+index 0c51ebb..e8c5f23 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/filteredreplies/FilteredRepliesDialog.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/filteredreplies/FilteredRepliesDialog.java
+@@ -1,5 +1,7 @@
+ package app.morphe.extension.newx.filteredreplies;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
+ import android.app.Activity;
+ import android.content.Context;
+ import android.content.res.ColorStateList;
+@@ -51,17 +53,15 @@ public final class FilteredRepliesDialog {
+                 FilteredRepliesStore.shared().getReplies(postId);
+ 
+         if (replies.isEmpty()) {
+-            Utils.showToastShort("No filtered replies for this post");
++            Utils.showToastShort(str("piko_newx_filtered_replies_no_results"));
+             return;
+         }
+ 
+         BottomSheetView sheet = new BottomSheetView(activity);
+-        sheet.setTitle("Filtered replies");
++        sheet.setTitle(str("piko_newx_filtered_replies_dialog_title"));
+ 
+         int count = replies.size();
+-        String subtitle = count == 1
+-                ? "1 reply hidden by verified accounts filter"
+-                : count + " replies hidden by verified accounts filter";
++        String subtitle = str("piko_newx_filtered_replies_count", count);
+         sheet.setSubtitle(subtitle);
+ 
+         LinearLayout listContainer = new LinearLayout(activity);
+@@ -116,7 +116,7 @@ public final class FilteredRepliesDialog {
+             String text = reply.getPostText();
+             if (!text.isEmpty()) {
+                 Utils.setClipboard(text);
+-                Utils.showToastShort("Copied reply text");
++                Utils.showToastShort(str("piko_newx_filtered_replies_copied"));
+             }
+             return true;
+         });
+@@ -177,7 +177,7 @@ public final class FilteredRepliesDialog {
+         TextView textView = new TextView(context);
+         String postText = reply.getPostText();
+         if (postText.isEmpty()) {
+-            textView.setText("(No text content)");
++            textView.setText(str("piko_newx_filtered_replies_no_text"));
+             textView.setTypeface(UpdateFont.customTypefaceOr(Typeface.defaultFromStyle(Typeface.ITALIC)));
+         } else {
+             textView.setText(postText);
+@@ -223,7 +223,7 @@ public final class FilteredRepliesDialog {
+     }
+ 
+     private static void setWhitelistedState(ButtonView button) {
+-        button.setText("Whitelisted ✓");
++        button.setText(str("piko_newx_filtered_replies_whitelisted"));
+         button.setButtonStyle(ButtonView.ButtonStyle.TONAL);
+         button.setEnabled(false);
+         button.setOnClickListener(null);
+@@ -234,17 +234,17 @@ public final class FilteredRepliesDialog {
+             String screenName,
+             Map<String, List<ButtonView>> authorButtons
+     ) {
+-        button.setText("+ Whitelist");
++        button.setText(str("piko_newx_filtered_replies_whitelist_add"));
+         button.setButtonStyle(ButtonView.ButtonStyle.FILLED);
+         button.setEnabled(true);
+         button.setOnClickListener(v -> {
+             try {
+                 VerifiedAccountWhitelistStore.shared().add(screenName);
+-                Utils.showToastShort("Added @" + screenName + " to whitelist");
++                Utils.showToastShort(str("piko_newx_filtered_replies_whitelist_added", screenName));
+             } catch (VerifiedAccountWhitelistStore.ValidationException e) {
+-                Utils.showToastShort("@" + screenName + " is already whitelisted");
++                Utils.showToastShort(str("piko_newx_filtered_replies_already", screenName));
+             } catch (Exception e) {
+-                Utils.showToastShort("Failed to whitelist: " + e.getMessage());
++                Utils.showToastShort(str("piko_newx_filtered_replies_add_failed", e.getMessage()));
+             }
+             updateAuthorButtons(authorButtons, screenName);
+         });
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/FilteredRepliesPostOptionHandler.java b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/FilteredRepliesPostOptionHandler.java
+index 3b55619..003219b 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/FilteredRepliesPostOptionHandler.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/FilteredRepliesPostOptionHandler.java
+@@ -1,5 +1,7 @@
+ package app.morphe.extension.newx.misc;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
+ import android.app.Activity;
+ import android.content.Context;
+ 
+@@ -21,7 +23,6 @@ public final class FilteredRepliesPostOptionHandler {
+     private static final String FILTERED_REPLIES_MENU_SETTING_ID =
+             "newx.content.verified_account_filtering.filtered_replies_menu";
+     private static final String URT_POST_CLASS = "com.x.models.timelines.items.UrtTimelinePost";
+-    private static final String OPTION_LABEL = "Filtered replies";
+ 
+     private FilteredRepliesPostOptionHandler() {
+     }
+@@ -31,7 +32,7 @@ public final class FilteredRepliesPostOptionHandler {
+     }
+ 
+     public static String labelFor(Object action, Object originalLabel) {
+-        if (isFilteredRepliesAction(action)) return OPTION_LABEL;
++        if (isFilteredRepliesAction(action)) return str("piko_newx_filtered_replies_option_label");
+         return originalLabel instanceof String ? (String) originalLabel : null;
+     }
+ 
+@@ -47,19 +48,19 @@ public final class FilteredRepliesPostOptionHandler {
+             Context context = presenterData.getContext();
+             Object post = presenterData.getValue();
+             if (context == null || post == null) {
+-                Utils.showToastShort("Could not find the selected post");
++                Utils.showToastShort(str("piko_newx_post_not_found"));
+                 return true;
+             }
+ 
+             Activity activity = NewXUtils.findUsableActivity(context);
+             if (activity == null) {
+-                Utils.showToastShort("Could not find the active screen");
++                Utils.showToastShort(str("piko_newx_screen_not_found"));
+                 return true;
+             }
+ 
+             String postId = NewXUtils.identifierToString(NewXUtils.invoke(post, "getId"));
+             if (postId == null || postId.isEmpty()) {
+-                Utils.showToastShort("Could not identify the selected post");
++                Utils.showToastShort(str("piko_newx_post_not_identified"));
+                 return true;
+             }
+ 
+@@ -67,7 +68,7 @@ public final class FilteredRepliesPostOptionHandler {
+             return true;
+         } catch (Exception exception) {
+             NewXLogger.printException(() -> "Failed to handle filtered replies option", exception);
+-            Utils.showToastShort("Could not open filtered replies");
++            Utils.showToastShort(str("piko_newx_filtered_replies_open_failed"));
+             return true;
+         }
+     }
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/InlineDownloadButton.java b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/InlineDownloadButton.java
+index 170fd6c..b64b778 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/InlineDownloadButton.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/InlineDownloadButton.java
+@@ -1,5 +1,7 @@
+ package app.morphe.extension.newx.misc;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
+ import android.annotation.SuppressLint;
+ import android.app.Activity;
+ import app.morphe.extension.newx.ui.Theme;
+@@ -62,8 +64,9 @@ public final class InlineDownloadButton {
+     private static final String[] NAMED_IMAGE_SIZES = {"4096x4096", "large", "medium", "small"};
+     private static final int[] NAMED_IMAGE_CAPS = {4096, 2048, 1200, 680};
+     /** Shown when the stored folder was refused and cleared; retapping opens the picker. */
+-    static final String FOLDER_LOST_MESSAGE =
+-            "Download folder is no longer available \u2014 tap download again to choose a new one";
++    static String folderLostMessage() {
++        return str("piko_newx_download_folder_lost_retry");
++    }
+     // Click-time parsing and enqueue run here so the tap handler returns immediately.
+     private static final ExecutorService CLICK_EXECUTOR = Executors.newSingleThreadExecutor();
+     // Timeline/profile scrolling creates a new action object per composition. Keep weak identity
+@@ -299,7 +302,7 @@ public final class InlineDownloadButton {
+             Context context = NewXUtils.findUsableActivity(null);
+             Object post = getPresenterPost(presenter);
+             if (context == null || post == null) {
+-                NewXInAppNotification.show("Could not find the selected post");
++                NewXInAppNotification.show(str("piko_newx_post_not_found"));
+                 return true;
+             }
+ 
+@@ -312,7 +315,7 @@ public final class InlineDownloadButton {
+             return true;
+         } catch (RuntimeException exception) {
+             NewXLogger.printException(() -> "Failed to process inline download action", exception);
+-            NewXInAppNotification.show("Could not download post media");
++            NewXInAppNotification.show(str("piko_newx_download_media_failed"));
+             return true;
+         }
+     }
+@@ -328,12 +331,12 @@ public final class InlineDownloadButton {
+             username = NewXUtils.sourceUsername(postText);
+         } catch (RuntimeException exception) {
+             NewXLogger.printException(() -> "Failed to process inline download action", exception);
+-            NewXUtils.runOnUiThread(() -> NewXInAppNotification.show("Could not download post media"));
++            NewXUtils.runOnUiThread(() -> NewXInAppNotification.show(str("piko_newx_download_media_failed")));
+             return;
+         }
+         if (downloads.isEmpty()) {
+             NewXUtils.runOnUiThread(() ->
+-                    NewXInAppNotification.showForUser("No downloadable media found", username));
++                    NewXInAppNotification.showForUser(str("piko_newx_download_no_media"), username));
+             return;
+         }
+ 
+@@ -1132,7 +1135,7 @@ public final class InlineDownloadButton {
+             } catch (RuntimeException exception) {
+                 NewXLogger.printException(() -> "Unsupported NewX download conflict policy", exception);
+                 NewXUtils.runOnUiThread(() ->
+-                        NewXInAppNotification.showForUser("Could not start download", username));
++                        NewXInAppNotification.showForUser(str("piko_newx_download_start_failed"), username));
+                 return;
+             }
+ 
+@@ -1205,7 +1208,7 @@ public final class InlineDownloadButton {
+             } catch (RuntimeException exception) {
+                 NewXLogger.printException(() -> "Failed to start NewX media download", exception);
+                 NewXUtils.runOnUiThread(() ->
+-                        reportDownloadStatus("Could not start download", username));
++                        reportDownloadStatus(str("piko_newx_download_start_failed"), username));
+                 return;
+             }
+             NewXUtils.runOnUiThread(() -> reportEnqueueResult(state, username));
+@@ -1305,7 +1308,7 @@ public final class InlineDownloadButton {
+     ) {
+         Activity activity = currentActivity();
+         if (activity == null) {
+-            NewXInAppNotification.show("Set a download folder in Download options");
++            NewXInAppNotification.show(str("piko_newx_download_set_folder"));
+             return;
+         }
+ 
+@@ -1421,10 +1424,10 @@ public final class InlineDownloadButton {
+ 
+     private static void reportEnqueueResult(EnqueueState state, String username) {
+         switch (state) {
+-            case QUEUED -> NewXInAppNotification.showForUser("Download started", username);
+-            case SKIPPED -> NewXInAppNotification.showForUser("Already downloaded", username);
+-            case FAILED -> reportDownloadStatus("Could not start download", username);
+-            case DESTINATION_LOST -> reportDownloadStatus(FOLDER_LOST_MESSAGE, username);
++            case QUEUED -> NewXInAppNotification.showForUser(str("piko_newx_download_started"), username);
++            case SKIPPED -> NewXInAppNotification.showForUser(str("piko_newx_download_already"), username);
++            case FAILED -> reportDownloadStatus(str("piko_newx_download_start_failed"), username);
++            case DESTINATION_LOST -> reportDownloadStatus(folderLostMessage(), username);
+         }
+     }
+ 
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/MediaMerger.java b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/MediaMerger.java
+index b4dc4ef..b33aacc 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/MediaMerger.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/MediaMerger.java
+@@ -1,5 +1,7 @@
+ package app.morphe.extension.newx.misc;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
+ import android.content.Context;
+ import android.net.Uri;
+ import android.graphics.Bitmap;
+@@ -65,7 +67,7 @@ public final class MediaMerger {
+             DownloadFileName.PostContext postContext
+     ) {
+         if (context == null || items == null || items.size() < 2) {
+-            NewXInAppNotification.showForUser("At least 2 images are required to merge", username);
++            NewXInAppNotification.showForUser(str("piko_newx_merge_need_two"), username);
+             return;
+         }
+ 
+@@ -73,7 +75,7 @@ public final class MediaMerger {
+         Context safeContext = applicationContext != null ? applicationContext : context;
+ 
+         NewXInAppNotification.showForUser(
+-                "Downloading and merging " + items.size() + " images...",
++                str("piko_newx_merge_progress", items.size()),
+                 username
+         );
+         MERGE_EXECUTOR.execute(() -> performMerge(safeContext, items, username, postContext));
+@@ -97,7 +99,7 @@ public final class MediaMerger {
+                 final int sliceIndex = i + 1;
+                 if (!downloaded) {
+                     NewXLogger.printInfo(() -> LOG_PREFIX + "Failed to download slice " + sliceIndex + " from " + item.url);
+-                    NewXInAppNotification.showForUser("Failed to download image slice " + sliceIndex, username);
++                    NewXInAppNotification.showForUser(str("piko_newx_merge_download_failed", sliceIndex), username);
+                     return;
+                 }
+             }
+@@ -112,7 +114,7 @@ public final class MediaMerger {
+                 opts.inJustDecodeBounds = true;
+                 BitmapFactory.decodeFile(tempFiles.get(i).getAbsolutePath(), opts);
+                 if (opts.outWidth <= 0 || opts.outHeight <= 0) {
+-                    NewXInAppNotification.showForUser("Failed to read dimensions of slice " + (i + 1), username);
++                    NewXInAppNotification.showForUser(str("piko_newx_merge_dimensions_failed", i + 1), username);
+                     return;
+                 }
+                 widths[i] = opts.outWidth;
+@@ -159,7 +161,7 @@ public final class MediaMerger {
+                 try {
+                     mergedBitmap = Bitmap.createBitmap(totalWidth, maxHeight, Bitmap.Config.RGB_565);
+                 } catch (OutOfMemoryError oom2) {
+-                    NewXInAppNotification.showForUser("Out of memory while stitching images", username);
++                    NewXInAppNotification.showForUser(str("piko_newx_merge_out_of_memory"), username);
+                     return;
+                 }
+             }
+@@ -172,7 +174,7 @@ public final class MediaMerger {
+                 Bitmap piece = BitmapFactory.decodeFile(tempFiles.get(i).getAbsolutePath());
+                 if (piece == null) {
+                     mergedBitmap.recycle();
+-                    NewXInAppNotification.showForUser("Failed to decode image slice " + (i + 1), username);
++                    NewXInAppNotification.showForUser(str("piko_newx_merge_decode_failed", i + 1), username);
+                     return;
+                 }
+ 
+@@ -221,7 +223,7 @@ public final class MediaMerger {
+             } catch (IllegalArgumentException exception) {
+                 mergedBitmap.recycle();
+                 NewXLogger.printException(() -> LOG_PREFIX + "Invalid NewX download request: " + fileName, exception);
+-                InlineDownloadButton.reportDownloadStatus("Failed to save merged image: " + fileName, username);
++                InlineDownloadButton.reportDownloadStatus(str("piko_newx_merge_save_failed", fileName), username);
+                 return;
+             }
+ 
+@@ -235,12 +237,12 @@ public final class MediaMerger {
+                 if (DestinationLoss.matches(exception)) {
+                     NewXDownloadFolders.invalidate(NewXDownloadFolders.MediaKind.IMAGES);
+                     InlineDownloadButton.reportDownloadStatus(
+-                            InlineDownloadButton.FOLDER_LOST_MESSAGE,
++                            InlineDownloadButton.folderLostMessage(),
+                             username
+                     );
+                 } else {
+                     InlineDownloadButton.reportDownloadStatus(
+-                            "Failed to save merged image: " + fileName,
++                            str("piko_newx_merge_save_failed", fileName),
+                             username
+                     );
+                 }
+@@ -248,7 +250,7 @@ public final class MediaMerger {
+             }
+             if (reservation == null) {
+                 mergedBitmap.recycle();
+-                NewXInAppNotification.showForUser("Merged image already exists: " + fileName, username);
++                NewXInAppNotification.showForUser(str("piko_newx_merge_already", fileName), username);
+                 return;
+             }
+ 
+@@ -256,19 +258,19 @@ public final class MediaMerger {
+                 writeMergedBitmap(context, mergedBitmap, reservation.documentUri(), format);
+                 NewXLogger.printInfo(() -> LOG_PREFIX + "Successfully merged and saved " + reservation.fileName());
+                 InlineDownloadButton.reportDownloadStatus(
+-                        "Merged image saved: " + reservation.fileName(), username);
++                        str("piko_newx_merge_saved", reservation.fileName()), username);
+             } catch (Exception exception) {
+                 destination.discard(context, reservation);
+                 NewXLogger.printException(() -> LOG_PREFIX + "Failed to write merged image", exception);
+                 if (DestinationLoss.matches(exception)) {
+                     NewXDownloadFolders.invalidate(NewXDownloadFolders.MediaKind.IMAGES);
+                     InlineDownloadButton.reportDownloadStatus(
+-                            InlineDownloadButton.FOLDER_LOST_MESSAGE,
++                            InlineDownloadButton.folderLostMessage(),
+                             username
+                     );
+                 } else {
+                     InlineDownloadButton.reportDownloadStatus(
+-                            "Failed to save merged image: " + fileName,
++                            str("piko_newx_merge_save_failed", fileName),
+                             username
+                     );
+                 }
+@@ -277,8 +279,8 @@ public final class MediaMerger {
+             }
+ 
+         } catch (Throwable t) {
+-            NewXLogger.printException(() -> LOG_PREFIX + "Failed to merge images", t);
+-            NewXInAppNotification.showForUser("Failed to merge images", username);
++            NewXLogger.printException(() -> LOG_PREFIX + str("piko_newx_merge_failed"), t);
++            NewXInAppNotification.showForUser(str("piko_newx_merge_failed"), username);
+         } finally {
+             for (File tempFile : tempFiles) {
+                 try {
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/MediaPickerDialog.java b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/MediaPickerDialog.java
+index b146344..5d1512c 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/MediaPickerDialog.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/MediaPickerDialog.java
+@@ -1,5 +1,7 @@
+ package app.morphe.extension.newx.misc;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
+ import android.app.Activity;
+ import android.content.Context;
+ import android.graphics.Bitmap;
+@@ -76,11 +78,11 @@ public final class MediaPickerDialog {
+         }
+ 
+         BottomSheetView dialog = new BottomSheetView(current);
+-        dialog.setTitle("Download media");
++        dialog.setTitle(str("piko_newx_picker_title"));
+ 
+         String defaultSubtitle = (username != null && !username.trim().isEmpty())
+-                ? "From @" + username.trim()
+-                : "Select media to save to your device";
++                ? str("piko_newx_media_from", username.trim())
++                : str("piko_newx_picker_subtitle");
+         dialog.setSubtitle(defaultSubtitle);
+ 
+         LinearLayout listContainer = new LinearLayout(current);
+@@ -119,7 +121,7 @@ public final class MediaPickerDialog {
+             mergeButton = new ButtonView(
+                     current,
+                     ButtonView.ButtonStyle.TONAL,
+-                    "Download & Merge"
++                    str("piko_newx_picker_download_merge")
+             );
+             dialog.addButton(mergeButton);
+         } else {
+@@ -130,7 +132,7 @@ public final class MediaPickerDialog {
+         final ButtonView downloadButton = new ButtonView(
+                 current,
+                 ButtonView.ButtonStyle.FILLED,
+-                hasMultiple ? "Download All (" + downloads.size() + ")" : "Download (1)"
++                hasMultiple ? str("piko_newx_picker_download_all", downloads.size()) : str("piko_newx_picker_download_count", 1)
+         );
+         if (!hasMultiple) {
+             downloadButton.setVisibility(View.GONE);
+@@ -160,19 +162,19 @@ public final class MediaPickerDialog {
+             }
+ 
+             if (isSelectionMode[0]) {
+-                dialog.setTitle("Select media");
+-                dialog.setSubtitle(selectedCount + " of " + downloads.size() + " selected");
++                dialog.setTitle(str("piko_newx_picker_select"));
++                dialog.setSubtitle(str("piko_newx_picker_selection_count", selectedCount, downloads.size()));
+                 downloadButton.setEnabled(true);
+                 if (selectedCount == downloads.size()) {
+-                    downloadButton.setText("Download All (" + downloads.size() + ")");
++                    downloadButton.setText(str("piko_newx_picker_download_all", downloads.size()));
+                 } else {
+-                    downloadButton.setText("Download (" + selectedCount + ")");
++                    downloadButton.setText(str("piko_newx_picker_download_count", selectedCount));
+                 }
+                 downloadButton.setVisibility(View.VISIBLE);
+ 
+                 if (mergeButton != null) {
+                     if (selectedImageCount >= 2) {
+-                        mergeButton.setText("Merge (" + selectedImageCount + ")");
++                        mergeButton.setText(str("piko_newx_picker_merge_count", selectedImageCount));
+                         mergeButton.setVisibility(View.VISIBLE);
+                         mergeButton.setEnabled(true);
+                     } else {
+@@ -180,18 +182,18 @@ public final class MediaPickerDialog {
+                     }
+                 }
+             } else {
+-                dialog.setTitle("Download media");
++                dialog.setTitle(str("piko_newx_picker_title"));
+                 dialog.setSubtitle(defaultSubtitle);
+                 downloadButton.setEnabled(true);
+                 if (hasMultiple) {
+-                    downloadButton.setText("Download All (" + downloads.size() + ")");
++                    downloadButton.setText(str("piko_newx_picker_download_all", downloads.size()));
+                     downloadButton.setVisibility(View.VISIBLE);
+                 } else {
+                     downloadButton.setVisibility(View.GONE);
+                 }
+ 
+                 if (mergeButton != null) {
+-                    mergeButton.setText("Download & Merge");
++                    mergeButton.setText(str("piko_newx_picker_download_merge"));
+                     mergeButton.setVisibility(View.VISIBLE);
+                     mergeButton.setEnabled(true);
+                 }
+@@ -264,7 +266,7 @@ public final class MediaPickerDialog {
+             InlineDownloadButton.DownloadItem item = downloads.get(i);
+ 
+             ListItem itemRow = new ListItem(current, themeSettings);
+-            itemRow.setTitle(item.label + (hasMultiple ? " " + (i + 1) : ""));
++            itemRow.setTitle(displayLabel(item) + (hasMultiple ? " " + (i + 1) : ""));
+             itemRow.setSubtitle(item.resolution);
+ 
+             IconView.IconType iconType = resolveIconType(item);
+@@ -457,12 +459,24 @@ public final class MediaPickerDialog {
+                     v -> {
+                         dialog.dismiss();
+                         Utils.setClipboard(item.url);
+-                        Utils.showToastShort("Link copied");
++                        Utils.showToastShort(str("piko_newx_link_copied"));
+                     }
+             );
+         }
+     }
+ 
++    static String displayLabel(InlineDownloadButton.DownloadItem item) {
++        switch (String.valueOf(item.label)) {
++            case "Image": return str("piko_newx_media_image");
++            case "Video": return str("piko_newx_media_video");
++            case "Original": return str("piko_newx_inline_download_quality_original");
++            case "Large": return str("piko_newx_inline_download_quality_large");
++            case "Medium": return str("piko_newx_inline_download_quality_medium");
++            case "Small": return str("piko_newx_inline_download_quality_small");
++            default: return item.label;
++        }
++    }
++
+     static boolean isImage(InlineDownloadButton.DownloadItem item) {
+         if (item == null) return false;
+         if (item.mimeType != null && item.mimeType.startsWith("image/")) return true;
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NativeDownloadRouter.java b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NativeDownloadRouter.java
+index fce1b62..9e8376a 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NativeDownloadRouter.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NativeDownloadRouter.java
+@@ -1,5 +1,7 @@
+ package app.morphe.extension.newx.misc;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
+ import android.content.Context;
+ import android.net.Uri;
+ 
+@@ -121,7 +123,7 @@ public final class NativeDownloadRouter {
+     ) {
+         DownloadEngine engine = NewXDownloader.get();
+         if (engine == null) {
+-            postStatus("Could not start download", username);
++            postStatus(str("piko_newx_download_start_failed"), username);
+             return;
+         }
+ 
+@@ -130,7 +132,7 @@ public final class NativeDownloadRouter {
+             policy = NewXDownloadFolders.conflictPolicy();
+         } catch (RuntimeException exception) {
+             NewXLogger.printException(() -> "Unsupported NewX download conflict policy", exception);
+-            postStatus("Could not start download", username);
++            postStatus(str("piko_newx_download_start_failed"), username);
+             return;
+         }
+ 
+@@ -152,19 +154,19 @@ public final class NativeDownloadRouter {
+             );
+         } catch (IllegalArgumentException exception) {
+             NewXLogger.printException(() -> "Invalid NewX download request: " + fileName, exception);
+-            postStatus("Could not start download", username);
++            postStatus(str("piko_newx_download_start_failed"), username);
+             return;
+         }
+ 
+         EnqueueResult result = engine.enqueue(request);
+         switch (result.state()) {
+-            case QUEUED -> postStatus("Download started", username);
+-            case SKIPPED -> postStatus("Already downloaded", username);
++            case QUEUED -> postStatus(str("piko_newx_download_started"), username);
++            case SKIPPED -> postStatus(str("piko_newx_download_already"), username);
+             case DESTINATION_LOST -> {
+                 NewXDownloadFolders.invalidate(kind);
+-                postStatus(InlineDownloadButton.FOLDER_LOST_MESSAGE, username);
++                postStatus(InlineDownloadButton.folderLostMessage(), username);
+             }
+-            case FAILED -> postStatus("Could not start download", username);
++            case FAILED -> postStatus(str("piko_newx_download_start_failed"), username);
+         }
+     }
+ 
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXCrashCopyReceiver.java b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXCrashCopyReceiver.java
+index eb86d11..917b51c 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXCrashCopyReceiver.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXCrashCopyReceiver.java
+@@ -15,22 +15,22 @@ public final class NewXCrashCopyReceiver extends BroadcastReceiver {
+         if (context == null) return;
+         File report = NewXCrashHandler.reportForIntent(context, intent);
+         if (report == null) {
+-            NewXCrashHandler.showToast(context, "Crash log is no longer available");
++            NewXCrashHandler.showToast(context, NewXCrashHandler.crashString(context, "piko_newx_crash_unavailable"));
+             return;
+         }
+         String text = NewXCrashHandler.readBounded(report, NewXCrashHandler.MAX_REPORT_CHARS);
+         if (text == null || text.isEmpty()) {
+-            NewXCrashHandler.showToast(context, "Could not read crash log");
++            NewXCrashHandler.showToast(context, NewXCrashHandler.crashString(context, "piko_newx_crash_read_failed"));
+             return;
+         }
+         try {
+             ClipboardManager clipboard =
+                     (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+             if (clipboard == null) throw new IllegalStateException("No clipboard service");
+-            clipboard.setPrimaryClip(ClipData.newPlainText("Piko crash log", text));
+-            NewXCrashHandler.showToast(context, "Crash log copied to clipboard");
++            clipboard.setPrimaryClip(ClipData.newPlainText(NewXCrashHandler.crashString(context, "piko_newx_crash_log_label"), text));
++            NewXCrashHandler.showToast(context, NewXCrashHandler.crashString(context, "piko_newx_crash_copied"));
+         } catch (Throwable ignored) {
+-            NewXCrashHandler.showToast(context, "Could not copy crash log");
++            NewXCrashHandler.showToast(context, NewXCrashHandler.crashString(context, "piko_newx_crash_copy_failed"));
+         }
+     }
+ }
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXCrashHandler.java b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXCrashHandler.java
+index 49daccf..8b2d804 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXCrashHandler.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXCrashHandler.java
+@@ -92,7 +92,7 @@ public final class NewXCrashHandler implements Thread.UncaughtExceptionHandler {
+     public void uncaughtException(Thread thread, Throwable throwable) {
+         try {
+             File report = saveCrashReport(context, throwable);
+-            showToast(context, "Piko crash log saved: " + report.getName());
++            showToast(context, crashString(context, "piko_newx_crash_saved", report.getName()));
+             showCrashNotification(context, report);
+         } catch (Throwable ignored) {
+             // The original handler must still run even if reporting fails.
+@@ -207,9 +207,9 @@ public final class NewXCrashHandler implements Thread.UncaughtExceptionHandler {
+         String text = shareText(report);
+         Intent share = new Intent(Intent.ACTION_SEND);
+         share.setType("text/plain");
+-        share.putExtra(Intent.EXTRA_SUBJECT, "Piko crash log: " + report.getName());
++        share.putExtra(Intent.EXTRA_SUBJECT, crashString(context, "piko_newx_crash_subject", report.getName()));
+         share.putExtra(Intent.EXTRA_TEXT, text != null ? text : report.getName());
+-        Intent chooser = Intent.createChooser(share, "Share crash log");
++        Intent chooser = Intent.createChooser(share, crashString(context, "piko_newx_crash_share"));
+         return PendingIntent.getActivity(context, 1, chooser, pendingIntentFlags());
+     }
+ 
+@@ -262,7 +262,7 @@ public final class NewXCrashHandler implements Thread.UncaughtExceptionHandler {
+             exportToDownloads(context, pending);
+         } catch (Throwable ignored) {
+         }
+-        showToast(context, "Piko crash detected, log saved: " + pending.getName());
++        showToast(context, crashString(context, "piko_newx_crash_pending", pending.getName()));
+         try {
+             showCrashNotification(context, pending);
+         } catch (Throwable ignored) {
+@@ -274,7 +274,7 @@ public final class NewXCrashHandler implements Thread.UncaughtExceptionHandler {
+         NotificationManager manager =
+                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+         if (manager == null || !notificationsAllowed(context)) return;
+-        createChannel(manager);
++        createChannel(context, manager);
+         Notification.Builder builder;
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+             builder = new Notification.Builder(context, CHANNEL_ID);
+@@ -283,13 +283,13 @@ public final class NewXCrashHandler implements Thread.UncaughtExceptionHandler {
+         }
+         String preview = readBounded(report, 512);
+         builder.setSmallIcon(android.R.drawable.stat_notify_error)
+-                .setContentTitle("Piko crash detected")
+-                .setContentText("Crash log saved: " + report.getName())
++                .setContentTitle(crashString(context, "piko_newx_crash_detected"))
++                .setContentText(crashString(context, "piko_newx_crash_notification_saved", report.getName()))
+                 .setStyle(new Notification.BigTextStyle().bigText(
+                         preview != null ? preview : report.getName()))
+-                .addAction(android.R.drawable.ic_menu_share, "Share",
++                .addAction(android.R.drawable.ic_menu_share, crashString(context, "piko_newx_media_sheet_share"),
+                         shareIntent(context, report))
+-                .addAction(android.R.drawable.ic_menu_edit, "Copy",
++                .addAction(android.R.drawable.ic_menu_edit, crashString(context, "piko_newx_copy_action"),
+                         actionIntent(context, NewXCrashCopyReceiver.class, report, 2))
+                 .setAutoCancel(true);
+         PendingIntent content = launchIntent(context);
+@@ -324,15 +324,20 @@ public final class NewXCrashHandler implements Thread.UncaughtExceptionHandler {
+         }
+     }
+ 
+-    private static void createChannel(NotificationManager manager) {
++    private static void createChannel(Context context, NotificationManager manager) {
+         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+         try {
+             manager.createNotificationChannel(new NotificationChannel(
+-                    CHANNEL_ID, "Piko crash logs", NotificationManager.IMPORTANCE_HIGH));
++                    CHANNEL_ID, crashString(context, "piko_newx_crash_channel"), NotificationManager.IMPORTANCE_HIGH));
+         } catch (Throwable ignored) {
+         }
+     }
+ 
++    static String crashString(Context context, String name, Object... args) {
++        int id = context.getResources().getIdentifier(name, "string", context.getPackageName());
++        return context.getString(id, args);
++    }
++
+     private static String collectDeviceInfo() {
+         try {
+             return "Brand: " + Build.BRAND + "\n"
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXCrashPostOptionHandler.java b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXCrashPostOptionHandler.java
+index 7f7a376..c118b25 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXCrashPostOptionHandler.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXCrashPostOptionHandler.java
+@@ -1,5 +1,7 @@
+ package app.morphe.extension.newx.misc;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
+ import java.util.List;
+ 
+ import app.morphe.extension.newx.settings.NewXLogger;
+@@ -11,7 +13,6 @@ public final class NewXCrashPostOptionHandler {
+     private static final String OPTION_NAME = NewXPostOptionActions.CRASH_APP_ACTION;
+     private static final String CRASH_POST_OPTION_SETTING_ID =
+             "newx.advanced.debug_tools.crash_post_option";
+-    private static final String OPTION_LABEL = "Crash app";
+ 
+     private NewXCrashPostOptionHandler() {
+     }
+@@ -21,7 +22,7 @@ public final class NewXCrashPostOptionHandler {
+     }
+ 
+     public static String labelFor(Object action, Object originalLabel) {
+-        if (isCrashAppAction(action)) return OPTION_LABEL;
++        if (isCrashAppAction(action)) return str("piko_newx_crash_app_title");
+         return originalLabel instanceof String ? (String) originalLabel : null;
+     }
+ 
+@@ -36,7 +37,7 @@ public final class NewXCrashPostOptionHandler {
+             NewXCrashHandler.testCrash("post menu");
+         } catch (Exception exception) {
+             NewXLogger.printException(() -> "Failed to crash from NewX post menu", exception);
+-            Utils.showToastShort("Could not crash the app");
++            Utils.showToastShort(str("piko_newx_crash_failed"));
+         }
+         return true;
+     }
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXDownloader.java b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXDownloader.java
+index 13ada4b..066bd85 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXDownloader.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXDownloader.java
+@@ -6,6 +6,8 @@
+ 
+ package app.morphe.extension.newx.misc;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
+ import android.content.Context;
+ 
+ import androidx.annotation.Nullable;
+@@ -19,7 +21,6 @@ import app.morphe.extension.crimera.downloader.DownloadEngine;
+ import app.morphe.extension.crimera.downloader.engine.DownloadControllers;
+ import app.morphe.extension.crimera.downloader.engine.DownloadLog;
+ import app.morphe.extension.crimera.downloader.engine.DownloadNotifications;
+-import app.morphe.extension.crimera.downloader.engine.EnglishNotificationTexts;
+ import app.morphe.extension.crimera.downloader.engine.HttpTransfer;
+ import app.morphe.extension.crimera.downloader.engine.NotificationListener;
+ import app.morphe.extension.crimera.downloader.engine.SafDestination;
+@@ -37,7 +38,6 @@ import app.morphe.extension.shared.Utils;
+  */
+ public final class NewXDownloader {
+     public static final String CHANNEL_ID = "piko_newx_downloads";
+-    private static final String CHANNEL_NAME = "Downloads";
+     private static final int TRANSFER_THREADS = 4;
+ 
+     private static volatile DownloadEngine engine;
+@@ -106,8 +106,8 @@ public final class NewXDownloader {
+                 new NotificationListener(
+                         applicationContext,
+                         CHANNEL_ID,
+-                        CHANNEL_NAME,
+-                        new EnglishNotificationTexts(),
++                        str("piko_newx_downloads_channel"),
++                        new NewXNotificationTexts(),
+                         created::requestFor
+                 ),
+                 NOTIFICATION_EXECUTOR
+@@ -151,7 +151,7 @@ public final class NewXDownloader {
+         @Override
+         public void onCompleted(DownloadEvent.Completed event) {
+             if (!DownloadNotifications.notificationsEnabled(context, CHANNEL_ID)) {
+-                InlineDownloadButton.reportDownloadStatus("Saved " + event.fileName(), event.label());
++                InlineDownloadButton.reportDownloadStatus(str("piko_newx_download_saved", event.fileName()), event.label());
+             }
+         }
+ 
+@@ -169,19 +169,19 @@ public final class NewXDownloader {
+                         NewXLogger.printException(() -> "Could not invalidate lost destination", e);
+                     }
+                 }
+-                InlineDownloadButton.reportDownloadStatus(InlineDownloadButton.FOLDER_LOST_MESSAGE, label);
++                InlineDownloadButton.reportDownloadStatus(InlineDownloadButton.folderLostMessage(), label);
+             } else if (event.reason() == FailureReason.NO_CONNECTION) {
+-                InlineDownloadButton.reportDownloadStatus("No connection — tap Retry when online", label);
++                InlineDownloadButton.reportDownloadStatus(str("piko_newx_download_no_connection"), label);
+             } else {
+                 DownloadRequest request = engine.requestFor(event.id());
+                 String fileName = request != null ? request.fileName() : "";
+-                InlineDownloadButton.reportDownloadStatus("Could not save " + fileName, label);
++                InlineDownloadButton.reportDownloadStatus(str("piko_newx_download_save_failed", fileName), label);
+             }
+         }
+ 
+         @Override
+         public void onCancelled(DownloadEvent.Cancelled event) {
+-            NewXInAppNotification.showForUser("Download cancelled", event.label());
++            NewXInAppNotification.showForUser(str("piko_newx_download_cancelled"), event.label());
+         }
+     }
+ }
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXObjectBrowserHandler.java b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXObjectBrowserHandler.java
+index f2ec8d1..f6e0ee0 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXObjectBrowserHandler.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXObjectBrowserHandler.java
+@@ -1,5 +1,7 @@
+ package app.morphe.extension.newx.misc;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
+ import android.app.Activity;
+ import android.content.Context;
+ 
+@@ -15,7 +17,6 @@ public final class NewXObjectBrowserHandler {
+     private static final String OPTION_NAME = NewXPostOptionActions.BROWSE_OBJECT_ACTION;
+     private static final String SETTING_ID = "newx.content.browse_tweet_object";
+     private static final String URT_POST_CLASS = "com.x.models.timelines.items.UrtTimelinePost";
+-    private static final String OPTION_LABEL = "Browse Tweet Object";
+ 
+     private NewXObjectBrowserHandler() {
+     }
+@@ -25,7 +26,7 @@ public final class NewXObjectBrowserHandler {
+     }
+ 
+     public static String labelFor(Object action, Object originalLabel) {
+-        if (isBrowseObjectAction(action)) return OPTION_LABEL;
++        if (isBrowseObjectAction(action)) return str("piko_newx_browse_tweet_object_title");
+         return originalLabel instanceof String ? (String) originalLabel : null;
+     }
+ 
+@@ -40,15 +41,15 @@ public final class NewXObjectBrowserHandler {
+             NewXUtils.PresenterData presenterData = NewXUtils.findPresenterData(presenter, URT_POST_CLASS);
+             Context context = presenterData.getContext();
+             Object post = presenterData.getValue();
+-            if (context == null || post == null) return fail("Could not find the selected post");
++            if (context == null || post == null) return fail(str("piko_newx_post_not_found"));
+ 
+             Activity activity = NewXUtils.findUsableActivity(context);
+-            if (activity == null) return fail("Could not find the active screen");
++            if (activity == null) return fail(str("piko_newx_screen_not_found"));
+ 
+             NewXUtils.runOnUiThread(() -> ObjectBrowser.browseObject(activity, post));
+             return true;
+         } catch (IllegalAccessException | RuntimeException exception) {
+-            return fail("Could not find the selected post");
++            return fail(str("piko_newx_post_not_found"));
+         }
+     }
+ 
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/ResolutionChooserDialog.java b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/ResolutionChooserDialog.java
+index 16caa21..51363db 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/misc/ResolutionChooserDialog.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/ResolutionChooserDialog.java
+@@ -1,5 +1,7 @@
+ package app.morphe.extension.newx.misc;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
+ import android.app.Activity;
+ import android.content.Context;
+ import android.widget.LinearLayout;
+@@ -49,7 +51,7 @@ public final class ResolutionChooserDialog {
+         }
+ 
+         BottomSheetView dialog = new BottomSheetView(current);
+-        dialog.setTitle(isImage(item) ? "Choose resolution" : "Choose quality");
++        dialog.setTitle(isImage(item) ? str("piko_newx_choose_resolution") : str("piko_newx_choose_quality"));
+         dialog.setSubtitle(subtitleFor(item, username));
+ 
+         Theme.SettingsSnapshot themeSettings = Theme.snapshot();
+@@ -58,7 +60,7 @@ public final class ResolutionChooserDialog {
+ 
+         for (InlineDownloadButton.DownloadItem option : item.resolutionOptions) {
+             ListItem row = new ListItem(current, themeSettings);
+-            row.setTitle(option.label);
++            row.setTitle(MediaPickerDialog.displayLabel(option));
+             row.setSubtitle(option.detail != null ? option.detail : option.resolution);
+             row.setLeadingIcon(
+                     resolveIconType(item),
+@@ -84,7 +86,7 @@ public final class ResolutionChooserDialog {
+     ) {
+         StringBuilder builder = new StringBuilder();
+         if (username != null && !username.trim().isEmpty()) {
+-            builder.append("From @").append(username.trim());
++            builder.append(str("piko_newx_media_from", username.trim()));
+         }
+         if (item.resolution != null) {
+             if (builder.length() > 0) builder.append(" · ");
+diff --git a/extensions/newx/src/main/java/app/morphe/extension/newx/timeline/ForYouTopicFilterSheet.java b/extensions/newx/src/main/java/app/morphe/extension/newx/timeline/ForYouTopicFilterSheet.java
+index cc354fd..c99566f 100644
+--- a/extensions/newx/src/main/java/app/morphe/extension/newx/timeline/ForYouTopicFilterSheet.java
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/timeline/ForYouTopicFilterSheet.java
+@@ -1,5 +1,7 @@
+ package app.morphe.extension.newx.timeline;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
+ import android.app.Activity;
+ import android.content.Context;
+ import android.os.Looper;
+@@ -57,8 +59,8 @@ final class ForYouTopicFilterSheet {
+             LinkedHashSet<String> selected = new LinkedHashSet<>(storedSelection);
+ 
+             BottomSheetView sheet = new BottomSheetView(activity);
+-            sheet.setTitle("For You topics");
+-            sheet.setSubtitle("Select topics to show in your For You timeline");
++            sheet.setTitle(str("piko_newx_topic_sheet_title"));
++            sheet.setSubtitle(str("piko_newx_topic_sheet_subtitle"));
+ 
+             LinearLayout body = new LinearLayout(activity);
+             body.setOrientation(LinearLayout.VERTICAL);
+@@ -120,12 +122,10 @@ final class ForYouTopicFilterSheet {
+ 
+     private static void updateActionButton(ButtonView button, int selectedCount) {
+         if (selectedCount > 0) {
+-            button.setText(selectedCount == 1
+-                    ? "Show only 1 topic"
+-                    : "Show only " + selectedCount + " topics");
++            button.setText(str("piko_newx_topic_show_count", selectedCount));
+             button.setButtonStyle(ButtonView.ButtonStyle.FILLED);
+         } else {
+-            button.setText("Reset");
++            button.setText(str("piko_newx_profile_tabs_editor_reset_confirm"));
+             button.setButtonStyle(ButtonView.ButtonStyle.TONAL);
+         }
+     }
+diff --git a/extensions/shared/library/src/main/java/app/morphe/extension/crimera/ObjectBrowser.java b/extensions/shared/library/src/main/java/app/morphe/extension/crimera/ObjectBrowser.java
+index a95eb9b..e787b36 100644
+--- a/extensions/shared/library/src/main/java/app/morphe/extension/crimera/ObjectBrowser.java
++++ b/extensions/shared/library/src/main/java/app/morphe/extension/crimera/ObjectBrowser.java
+@@ -6,6 +6,8 @@
+ 
+ package app.morphe.extension.crimera;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
+ import android.app.AlertDialog;
+ import android.content.Context;
+ import android.graphics.Typeface;
+@@ -48,7 +50,7 @@ public class ObjectBrowser {
+     public static void browseObject(Context context, Object obj) {
+         try {
+             if (context == null || obj == null) {
+-                Utils.showToastShort("Cannot browse null object");
++                Utils.showToastShort(str("piko_newx_browser_null"));
+                 return;
+             }
+ 
+@@ -56,13 +58,13 @@ public class ObjectBrowser {
+             showObjectDialog(context, obj, title, false, null);
+         } catch (Exception ex) {
+             app.morphe.extension.crimera.PikoUtils.logger(ex);
+-            Utils.showToastShort("Could not open object browser");
++            Utils.showToastShort(str("piko_newx_browser_open_failed"));
+         }
+     }
+ 
+     private static void browseObject(Context context, Object obj, String path) {
+         if (context == null || obj == null) {
+-            Utils.showToastShort("Cannot browse null object");
++            Utils.showToastShort(str("piko_newx_browser_null"));
+             return;
+         }
+ 
+@@ -72,7 +74,7 @@ public class ObjectBrowser {
+ 
+     private static void browseClass(Context context, Class<?> clazz) {
+         if (clazz.isPrimitive() || clazz == String.class) {
+-            Utils.showToastShort("Type: " + clazz.getSimpleName());
++            Utils.showToastShort(str("piko_newx_browser_type", clazz.getSimpleName()));
+             return;
+         }
+ 
+@@ -88,7 +90,7 @@ public class ObjectBrowser {
+         mainContainer.setOrientation(LinearLayout.VERTICAL);
+ 
+         EditText searchBox = new EditText(context);
+-        searchBox.setHint("Search fields and methods...");
++        searchBox.setHint(str("piko_newx_browser_search"));
+         LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
+                 ViewGroup.LayoutParams.MATCH_PARENT,
+                 ViewGroup.LayoutParams.WRAP_CONTENT
+@@ -107,7 +109,7 @@ public class ObjectBrowser {
+         Class<?> clazz = classView != null ? classView : (obj != null ? obj.getClass() : null);
+         if (clazz == null) {
+             TextView error = new TextView(context);
+-            error.setText("Could not resolve class: " + title);
++            error.setText(str("piko_newx_browser_class_failed", title));
+             container.addView(error);
+         } else {
+             // Class info section at the top
+@@ -117,7 +119,7 @@ public class ObjectBrowser {
+         if (clazz != null) {
+             // Fields section header
+             TextView fieldsHeader = new TextView(context);
+-            fieldsHeader.setText("━━ Fields ━━");
++            fieldsHeader.setText(str("piko_newx_browser_fields"));
+             fieldsHeader.setTextColor(0xFF64B5F6);
+             fieldsHeader.setTypeface(null, Typeface.BOLD);
+             fieldsHeader.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(8));
+@@ -137,7 +139,7 @@ public class ObjectBrowser {
+                     container.addView(row);
+                 } catch (Exception e) {
+                     TextView errorRow = new TextView(context);
+-                    errorRow.setText("Error reading field: " + field.getName());
++                    errorRow.setText(str("piko_newx_browser_field_failed", field.getName()));
+                     container.addView(errorRow);
+                 }
+             }
+@@ -146,7 +148,7 @@ public class ObjectBrowser {
+         // Methods section
+         if (clazz != null) {
+             TextView methodsHeader = new TextView(context);
+-            methodsHeader.setText("━━ Methods ━━");
++            methodsHeader.setText(str("piko_newx_browser_methods"));
+             methodsHeader.setTextColor(0xFF81C784);
+             methodsHeader.setTypeface(null, Typeface.BOLD);
+             methodsHeader.setPadding(dpToPx(16), dpToPx(24), dpToPx(16), dpToPx(8));
+@@ -173,7 +175,7 @@ public class ObjectBrowser {
+                     container.addView(row);
+                 } catch (Exception e) {
+                     TextView errorRow = new TextView(context);
+-                    errorRow.setText("Error reading method: " + method.getName());
++                    errorRow.setText(str("piko_newx_browser_method_failed", method.getName()));
+                     container.addView(errorRow);
+                 }
+             }
+@@ -198,7 +200,7 @@ public class ObjectBrowser {
+ 
+         mainContainer.addView(scrollView);
+         builder.setView(mainContainer);
+-        builder.setNeutralButton("Close", null);
++        builder.setNeutralButton(str("piko_newx_browser_close"), null);
+         builder.show();
+     }
+ 
+@@ -325,7 +327,7 @@ public class ObjectBrowser {
+             try {
+                 fieldValue = field.get(obj);
+             } catch (IllegalAccessException e) {
+-                fieldValue = "<access denied>";
++                fieldValue = str("piko_newx_browser_access_denied");
+             }
+         }
+ 
+@@ -374,7 +376,7 @@ public class ObjectBrowser {
+             textView.setTypeface(Typeface.MONOSPACE);
+             textView.setOnClickListener(v -> {
+                 Utils.setClipboard(String.valueOf(finalFieldValue));
+-                Utils.showToastShort("Copied: " + String.valueOf(finalFieldValue));
++                Utils.showToastShort(str("piko_newx_browser_copied", String.valueOf(finalFieldValue)));
+             });
+             return textView;
+         }
+@@ -462,9 +464,9 @@ public class ObjectBrowser {
+                 if (isVoid) {
+                     try {
+                         method.invoke(obj);
+-                        Utils.showToastShort("Executed: " + methodName + "()");
++                        Utils.showToastShort(str("piko_newx_browser_executed", methodName));
+                     } catch (Exception e) {
+-                        Utils.showToastShort("Error: " + e.getMessage());
++                        Utils.showToastShort(str("piko_newx_browser_error", e.getMessage()));
+                     }
+                 } else {
+                     try {
+@@ -478,7 +480,7 @@ public class ObjectBrowser {
+                             browseObject(context, result, methodPath + "()");
+                         }
+                     } catch (Exception e) {
+-                        Utils.showToastShort("Error: " + e.getMessage());
++                        Utils.showToastShort(str("piko_newx_browser_error", e.getMessage()));
+                     }
+                 }
+             });
+@@ -489,13 +491,13 @@ public class ObjectBrowser {
+ 
+     private static void showListDialog(Context context, List<?> list, String parentPath) {
+         AlertDialog.Builder builder = new AlertDialog.Builder(context);
+-        builder.setTitle(parentPath + " (" + list.size() + " items)");
++        builder.setTitle(str("piko_newx_browser_list", parentPath, list.size()));
+ 
+         LinearLayout mainContainer = new LinearLayout(context);
+         mainContainer.setOrientation(LinearLayout.VERTICAL);
+ 
+         EditText searchBox = new EditText(context);
+-        searchBox.setHint("Search items...");
++        searchBox.setHint(str("piko_newx_browser_search_items"));
+         LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
+                 ViewGroup.LayoutParams.MATCH_PARENT,
+                 ViewGroup.LayoutParams.WRAP_CONTENT
+@@ -535,7 +537,7 @@ public class ObjectBrowser {
+                 final String finalValue = String.valueOf(item);
+                 textView.setOnClickListener(v -> {
+                     Utils.setClipboard(finalValue);
+-                    Utils.showToastShort("Copied: " + finalValue);
++                    Utils.showToastShort(str("piko_newx_browser_copied", finalValue));
+                 });
+             } else {
+                 textView.setText("[" + i + "] " + getClassName(item.getClass()) + " ->");
+@@ -565,19 +567,19 @@ public class ObjectBrowser {
+ 
+         mainContainer.addView(scrollView);
+         builder.setView(mainContainer);
+-        builder.setNeutralButton("Close", null);
++        builder.setNeutralButton(str("piko_newx_browser_close"), null);
+         builder.show();
+     }
+ 
+     private static void showArrayDialog(Context context, Object array, String parentPath) {
+         AlertDialog.Builder builder = new AlertDialog.Builder(context);
+-        builder.setTitle(parentPath + " (Array)");
++        builder.setTitle(str("piko_newx_browser_array", parentPath));
+ 
+         LinearLayout mainContainer = new LinearLayout(context);
+         mainContainer.setOrientation(LinearLayout.VERTICAL);
+ 
+         EditText searchBox = new EditText(context);
+-        searchBox.setHint("Search items...");
++        searchBox.setHint(str("piko_newx_browser_search_items"));
+         LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
+                 ViewGroup.LayoutParams.MATCH_PARENT,
+                 ViewGroup.LayoutParams.WRAP_CONTENT
+@@ -619,7 +621,7 @@ public class ObjectBrowser {
+                 final String finalValue = String.valueOf(item);
+                 textView.setOnClickListener(v -> {
+                     Utils.setClipboard(finalValue);
+-                    Utils.showToastShort("Copied: " + finalValue);
++                    Utils.showToastShort(str("piko_newx_browser_copied", finalValue));
+                 });
+             } else {
+                 textView.setText("[" + i + "] " + getClassName(item.getClass()) + " ->");
+@@ -649,7 +651,7 @@ public class ObjectBrowser {
+ 
+         mainContainer.addView(scrollView);
+         builder.setView(mainContainer);
+-        builder.setNeutralButton("Close", null);
++        builder.setNeutralButton(str("piko_newx_browser_close"), null);
+         builder.show();
+     }
+ 
+diff --git a/patches/src/main/resources/addresources/values/newx/strings.xml b/patches/src/main/resources/addresources/values/newx/strings.xml
+index d16c3d2..b8c88d5 100644
+--- a/patches/src/main/resources/addresources/values/newx/strings.xml
++++ b/patches/src/main/resources/addresources/values/newx/strings.xml
+@@ -491,4 +491,89 @@
+     <string name="piko_newx_settings_search_clear">Clear search</string>
+     <string name="piko_newx_settings_search_no_results">No results for \"%s\"</string>
+ 
++    <string name="piko_newx_picker_title">Download media</string>
++    <string name="piko_newx_media_from">From @%1$s</string>
++    <string name="piko_newx_picker_subtitle">Select media to save to your device</string>
++    <string name="piko_newx_picker_download_merge">Download &amp; Merge</string>
++    <string name="piko_newx_picker_download_all">Download All (%1$d)</string>
++    <string name="piko_newx_picker_download_count">Download (%1$d)</string>
++    <string name="piko_newx_picker_merge_count">Merge (%1$d)</string>
++    <string name="piko_newx_picker_select">Select media</string>
++    <string name="piko_newx_picker_selection_count">%1$d of %2$d selected</string>
++    <string name="piko_newx_link_copied">Link copied</string>
++    <string name="piko_newx_media_image">Image</string>
++    <string name="piko_newx_media_video">Video</string>
++    <string name="piko_newx_choose_resolution">Choose resolution</string>
++    <string name="piko_newx_choose_quality">Choose quality</string>
++    <string name="piko_newx_filtered_replies_no_results">No filtered replies for this post</string>
++    <string name="piko_newx_filtered_replies_count">%1$d replies hidden by verified accounts filter</string>
++    <string name="piko_newx_filtered_replies_no_text">(No text content)</string>
++    <string name="piko_newx_filtered_replies_already">@%1$s is already whitelisted</string>
++    <string name="piko_newx_filtered_replies_add_failed">Failed to whitelist: %1$s</string>
++    <string name="piko_newx_post_not_found">Could not find the selected post</string>
++    <string name="piko_newx_screen_not_found">Could not find the active screen</string>
++    <string name="piko_newx_post_not_identified">Could not identify the selected post</string>
++    <string name="piko_newx_filtered_replies_open_failed">Could not open filtered replies</string>
++    <string name="piko_newx_crash_failed">Could not crash the app</string>
++    <string name="piko_newx_download_media_failed">Could not download post media</string>
++    <string name="piko_newx_download_no_media">No downloadable media found</string>
++    <string name="piko_newx_download_start_failed">Could not start download</string>
++    <string name="piko_newx_download_started">Download started</string>
++    <string name="piko_newx_download_already">Already downloaded</string>
++    <string name="piko_newx_download_set_folder">Set a download folder in Download options</string>
++    <string name="piko_newx_download_cancelled">Download cancelled</string>
++    <string name="piko_newx_download_folder_lost_retry">Download folder is no longer available — tap download again to choose a new one</string>
++    <string name="piko_newx_download_saved">Saved %1$s</string>
++    <string name="piko_newx_download_no_connection">No connection — tap Retry when online</string>
++    <string name="piko_newx_download_save_failed">Could not save %1$s</string>
++    <string name="piko_newx_downloads_channel">Downloads</string>
++    <string name="piko_newx_merge_need_two">At least 2 images are required to merge</string>
++    <string name="piko_newx_merge_progress">Downloading and merging %1$d images...</string>
++    <string name="piko_newx_merge_download_failed">Failed to download image slice %1$d</string>
++    <string name="piko_newx_merge_dimensions_failed">Failed to read dimensions of slice %1$d</string>
++    <string name="piko_newx_merge_out_of_memory">Out of memory while stitching images</string>
++    <string name="piko_newx_merge_decode_failed">Failed to decode image slice %1$d</string>
++    <string name="piko_newx_merge_save_failed">Failed to save merged image: %1$s</string>
++    <string name="piko_newx_merge_already">Merged image already exists: %1$s</string>
++    <string name="piko_newx_merge_saved">Merged image saved: %1$s</string>
++    <string name="piko_newx_merge_failed">Failed to merge images</string>
++    <string name="piko_newx_topic_sheet_title">For You topics</string>
++    <string name="piko_newx_topic_sheet_subtitle">Select topics to show in your For You timeline</string>
++    <string name="piko_newx_topic_show_count">Show only %1$d topics</string>
++    <string name="piko_newx_crash_detected">Piko crash detected</string>
++    <string name="piko_newx_crash_share">Share crash log</string>
++    <string name="piko_newx_crash_channel">Piko crash logs</string>
++    <string name="piko_newx_copy_action">Copy</string>
++    <string name="piko_newx_crash_saved">Piko crash log saved: %1$s</string>
++    <string name="piko_newx_crash_subject">Piko crash log: %1$s</string>
++    <string name="piko_newx_crash_pending">Piko crash detected, log saved: %1$s</string>
++    <string name="piko_newx_crash_notification_saved">Crash log saved: %1$s</string>
++    <string name="piko_newx_crash_unavailable">Crash log is no longer available</string>
++    <string name="piko_newx_crash_read_failed">Could not read crash log</string>
++    <string name="piko_newx_crash_copied">Crash log copied to clipboard</string>
++    <string name="piko_newx_crash_copy_failed">Could not copy crash log</string>
++    <string name="piko_newx_crash_log_label">Piko crash log</string>
++    <string name="piko_newx_download_waiting">Waiting for connection</string>
++    <string name="piko_newx_retry_action">Retry</string>
++    <string name="piko_newx_download_completed">Download Completed</string>
++    <string name="piko_newx_download_failed">Download failed</string>
++    <string name="piko_newx_download_folder_lost">Download folder is no longer available</string>
++    <string name="piko_newx_share_file">Share %1$s</string>
++    <string name="piko_newx_browser_null">Cannot browse null object</string>
++    <string name="piko_newx_browser_open_failed">Could not open object browser</string>
++    <string name="piko_newx_browser_type">Type: %1$s</string>
++    <string name="piko_newx_browser_search">Search fields and methods...</string>
++    <string name="piko_newx_browser_class_failed">Could not resolve class: %1$s</string>
++    <string name="piko_newx_browser_fields">━━ Fields ━━</string>
++    <string name="piko_newx_browser_methods">━━ Methods ━━</string>
++    <string name="piko_newx_browser_field_failed">Error reading field: %1$s</string>
++    <string name="piko_newx_browser_method_failed">Error reading method: %1$s</string>
++    <string name="piko_newx_browser_close">Close</string>
++    <string name="piko_newx_browser_access_denied">&lt;access denied&gt;</string>
++    <string name="piko_newx_browser_copied">Copied: %1$s</string>
++    <string name="piko_newx_browser_executed">Executed: %1$s()</string>
++    <string name="piko_newx_browser_error">Error: %1$s</string>
++    <string name="piko_newx_browser_search_items">Search items...</string>
++    <string name="piko_newx_browser_list">%1$s (%2$d items)</string>
++    <string name="piko_newx_browser_array">%1$s (Array)</string>
+ </resources>
+--- /dev/null
++++ b/extensions/newx/src/main/java/app/morphe/extension/newx/misc/NewXNotificationTexts.java
+@@ -0,0 +1,63 @@
++/**
++ * @file NewXNotificationTexts.java
++ * @author: ForUltraplayer
++ * @brief Locale-aware text provider for NewX download notifications.
++ */
++package app.morphe.extension.newx.misc;
++
++import app.morphe.extension.crimera.downloader.engine.NotificationTexts;
++
++import static app.morphe.extension.shared.StringRef.str;
++
++final class NewXNotificationTexts implements NotificationTexts {
++    @Override
++    public String waitingForConnection() {
++        return str("piko_newx_download_waiting");
++    }
++
++    @Override
++    public String cancelAction() {
++        return str("piko_newx_settings_cancel");
++    }
++
++    @Override
++    public String shareAction() {
++        return str("piko_newx_media_sheet_share");
++    }
++
++    @Override
++    public String deleteAction() {
++        return str("piko_newx_post_option_delete");
++    }
++
++    @Override
++    public String retryAction() {
++        return str("piko_newx_retry_action");
++    }
++
++    @Override
++    public String downloadCompleted() {
++        return str("piko_newx_download_completed");
++    }
++
++    @Override
++    public String downloadFailed() {
++        return str("piko_newx_download_failed");
++    }
++
++    @Override
++    public String noConnection() {
++        return str("piko_newx_download_no_connection");
++    }
++
++    @Override
++    public String folderLost() {
++        return str("piko_newx_download_folder_lost");
++    }
++
++    @Override
++    public String shareChooserTitle(String fileName) {
++        return fileName != null && !fileName.isEmpty()
++                ? str("piko_newx_share_file", fileName) : str("piko_newx_media_sheet_share");
++    }
++}

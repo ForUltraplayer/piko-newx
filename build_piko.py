@@ -3,8 +3,10 @@ import re
 import shutil
 import subprocess
 import tempfile
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
+from xml.etree import ElementTree
 
 PIKO_REPO = "crimera/piko"
 PIKO_REPOSITORY = f"https://github.com/{PIKO_REPO}.git"
@@ -83,6 +85,61 @@ def set_project_version(piko_directory: Path, version: str) -> None:
     properties_path.write_text("".join(lines), encoding="utf-8")
 
 
+def apply_korean_resources(piko_directory: Path) -> int:
+    """Apply the UI resource hooks, then validate and install the Korean catalog."""
+    source_patch = Path(__file__).resolve().parent / "locales/newx-ui.patch"
+    check = subprocess.run(
+        ["git", "apply", "--check", str(source_patch)],
+        cwd=piko_directory,
+        capture_output=True,
+        text=True,
+    )
+    if check.returncode == 0:
+        subprocess.run(["git", "apply", str(source_patch)], cwd=piko_directory, check=True)
+    else:
+        already_applied = subprocess.run(
+            ["git", "apply", "--reverse", "--check", str(source_patch)],
+            cwd=piko_directory,
+            capture_output=True,
+            text=True,
+        )
+        if already_applied.returncode != 0:
+            raise ValueError(f"NewX localization source patch no longer applies:\n{check.stderr}")
+    resources = piko_directory / "patches/src/main/resources/addresources"
+    original = ElementTree.parse(resources / "values/newx/strings.xml").getroot()
+    catalog_path = Path(__file__).resolve().parent / "locales/ko/newx/strings.xml"
+    catalog = ElementTree.parse(catalog_path).getroot()
+    expected = {
+        element.attrib["name"]: element.text or ""
+        for element in original
+        if element.tag == "string" and element.get("translatable") != "false"
+    }
+    translated = {
+        element.attrib["name"]: element.text or ""
+        for element in catalog
+        if element.tag == "string"
+    }
+    if catalog.tag != "resources" or len(translated) != len(catalog):
+        raise ValueError("Korean catalog contains duplicate names or unsupported elements")
+    missing = sorted(expected.keys() - translated.keys())
+    extra = sorted(translated.keys() - expected.keys())
+    if missing or extra:
+        raise ValueError(f"Korean catalog is out of date: missing={missing}, extra={extra}")
+
+    # Indexed placeholders may change order in Korean, but their types and counts must survive.
+    tokens = re.compile(r"%(?:\d+\$)?[a-zA-Z%]|\{[^{}]+\}")
+    for name, text in translated.items():
+        if not text.strip():
+            raise ValueError(f"Empty Korean translation: {name}")
+        if Counter(tokens.findall(text)) != Counter(tokens.findall(expected[name])):
+            raise ValueError(f"Korean translation changed formatting tokens: {name}")
+
+    destination = resources / "values-ko-rKR/newx/strings.xml"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(catalog_path, destination)
+    return len(translated)
+
+
 def build_piko_patches(
     patch_version: str, output: str | None = None
 ) -> PikoBuild:
@@ -116,10 +173,11 @@ def build_piko_patches(
         )
 
         pre_build_cleanup(piko_directory)
+        apply_korean_resources(piko_directory)
         set_project_version(piko_directory, patch_version)
 
         subprocess.run(
-            ["./gradlew", "clean", "buildAndroid"],
+            ["./gradlew.bat" if os.name == "nt" else "./gradlew", "clean", "buildAndroid", "--no-daemon"],
             cwd=piko_directory,
             env=os.environ.copy(),
             check=True,

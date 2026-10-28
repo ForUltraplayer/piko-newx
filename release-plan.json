@@ -1,0 +1,19 @@
+{
+  "repository": "ForUltraplayer/piko-newx",
+  "tag": "v0.1.0",
+  "title": "Piko NewX Korean v0.1.0",
+  "prerelease": false,
+  "notes_file": "RELEASE_NOTES.md",
+  "assets": [
+    "dist/release-v0.1.0/patches-bundle.json",
+    "dist/release-v0.1.0/piko-newx-korean-0.1.0-source.zip",
+    "dist/release-v0.1.0/piko-newx-korean-0.1.0.mpp",
+    "dist/release-v0.1.0/public-key.txt",
+    "dist/release-v0.1.0/release-report.json",
+    "dist/release-v0.1.0/RELEASE_NOTES.md",
+    "dist/release-v0.1.0/SHA256SUMS.txt"
+  ],
+  "morphe_add_source": "https://morphe.software/add-source?github=ForUltraplayer/piko-newx",
+  "status": "release definition approved for publication",
+  "release_url": "https://github.com/ForUltraplayer/piko-newx/releases/tag/v0.1.0"
+}
