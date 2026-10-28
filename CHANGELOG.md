@@ -1,3 +1,8 @@
+## [3.66.0](https://github.com/crimera/piko-newx/compare/v3.65.0...v3.66.0) (2026-10-28)
+
+### ✨ New Features
+* **Twitter - newx:** disable timeline status injections ([48af8e1](https://github.com/crimera/piko/commit/48af8e1a7438e6d4d2f18ebe894acdcc0eeb7272))
+
 ## [3.65.0](https://github.com/crimera/piko-newx/compare/v3.64.1...v3.65.0) (2026-10-27)
 
 ### ✨ New Features
